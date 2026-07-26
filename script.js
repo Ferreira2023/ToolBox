@@ -114,7 +114,7 @@ function iniciarGeradorBD() {
     if (total === 0) {
       listaVisual.innerHTML = `
         <div class="empty-file-list">
-          <span>📂</span>
+          <span>🗁</span>
           <p>Nenhum arquivo selecionado.</p>
         </div>
       `;
@@ -362,7 +362,7 @@ function iniciarGeradorCartao() {
     if (filaPlanilhas.length === 0) {
       listaVisual.innerHTML = `
         <div class="empty-file-list">
-          <span>📂</span>
+          <span>🗁</span>
           <p>Nenhuma planilha selecionada.</p>
         </div>
       `;
