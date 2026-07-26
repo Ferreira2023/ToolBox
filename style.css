@@ -1,0 +1,521 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --sidebar-width: 260px;
+  --topbar-height: 76px;
+  --soft: #f3f4f6;
+  --bg: #f5f6fa;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --dark: #111827;
+  --blue: #2563eb;
+  --green: #16a34a;
+  --red: #dc2626;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* ==============================
+   TOPO FIXO
+============================== */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-width);
+  right: 0;
+  height: var(--topbar-height);
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 900;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.icon-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--card);
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.icon-btn:hover {
+  background: var(--soft);
+}
+
+/* ==============================
+   LATERAL ESQUERDA FIXA
+============================== */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--card);
+  border-right: 1px solid var(--line);
+  padding: 18px 14px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.logo-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--dark);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-btn {
+  width: 100%;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px;
+  border-radius: 16px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #4b5563;
+  margin-bottom: 6px;
+  text-align: left;
+}
+
+.menu-btn:hover {
+  background: var(--soft);
+}
+
+.menu-btn.active {
+  background: #e8eefc;
+  color: #111827;
+  font-weight: 600;
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+/* ==============================
+   ÁREA PRINCIPAL
+============================== */
+.main {
+  margin-left: var(--sidebar-width);
+  padding-top: var(--topbar-height);
+  min-height: 100vh;
+}
+
+.pagina {
+  padding: 40px;
+}
+
+.loading-page {
+  padding: 30px;
+  color: var(--muted);
+}
+
+.page-header {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  padding: 28px;
+  margin-bottom: 24px;
+}
+
+.page-label {
+  display: inline-block;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--blue);
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+.page-header h1 {
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1.05;
+  margin-bottom: 10px;
+}
+
+.page-header p {
+  color: var(--muted);
+  font-size: 18px;
+}
+
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.home-card,
+.tool-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 24px;
+}
+
+.home-card span,
+.placeholder-icon {
+  font-size: 34px;
+  display: inline-block;
+  margin-bottom: 14px;
+}
+
+.home-card h2,
+.tool-card h2 {
+  font-size: 22px;
+  margin-bottom: 10px;
+}
+
+.home-card p,
+.tool-card p {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.placeholder-card {
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* ==============================
+   GERADOR DE BD
+============================== */
+.bd-card {
+  width: min(100%, 980px);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  padding: clamp(20px, 4vw, 34px);
+  box-shadow: 0 16px 42px rgba(15, 23, 42, 0.08);
+}
+
+.bd-field {
+  margin-bottom: 22px;
+}
+
+.bd-field label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #111827;
+}
+
+.step-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--dark);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+select,
+input[type="file"] {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 18px;
+  background: #fff;
+  padding: 14px;
+  font-size: 16px;
+  outline: none;
+}
+
+select:focus,
+input[type="file"]:focus {
+  border-color: var(--blue);
+}
+
+.queue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin: 22px 0 12px;
+  font-weight: 400;
+}
+
+.queue-header strong {
+  display: block;
+  font-size: 18px;
+}
+
+.queue-header small {
+  color: var(--muted);
+}
+
+.clear-btn {
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  color: var(--red);
+  padding: 10px 16px;
+  border-radius: 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.file-list {
+  border: 1px dashed #cbd5e1;
+  border-radius: 22px;
+  background: #f8fafc;
+  padding: 16px;
+  min-height: 120px;
+  margin-bottom: 20px;
+}
+
+.empty-file-list {
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: var(--muted);
+  text-align: center;
+}
+
+.empty-file-list span {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+
+.file-item:last-child {
+  margin-bottom: 0;
+}
+
+.file-item strong {
+  display: block;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.file-item small {
+  color: var(--muted);
+}
+
+.remove-file-btn {
+  border: none;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 12px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.generate-btn {
+  width: 100%;
+  border: none;
+  background: var(--dark);
+  color: #fff;
+  padding: 17px 22px;
+  border-radius: 22px;
+  font-size: 16px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.generate-btn:hover:not(:disabled) {
+  background: #374151;
+}
+
+.generate-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 18px;
+  color: var(--muted);
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #dbeafe;
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.status-area {
+  margin-top: 18px;
+  font-weight: 700;
+}
+
+.status-area.success {
+  color: var(--green);
+}
+
+.status-area.error {
+  color: var(--red);
+}
+
+/* ==============================
+   RESPONSIVO
+============================== */
+@media (max-width: 1100px) {
+  .home-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  :root {
+    --sidebar-width: 78px;
+  }
+
+  .sidebar {
+    padding: 14px 8px;
+  }
+
+  .logo-area span,
+  .menu-btn > span:last-child {
+    display: none;
+  }
+
+  .logo-area {
+    justify-content: center;
+  }
+
+  .menu-btn {
+    justify-content: center;
+    padding: 12px 8px;
+  }
+
+  .topbar {
+    padding: 0 16px;
+  }
+
+  .page-title {
+    font-size: 18px;
+  }
+
+  .pagina {
+    padding: 14px;
+  }
+
+  .home-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bd-card {
+    border-radius: 22px;
+  }
+
+  .queue-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* ==============================
+   GERADOR DE CARTÃO-RESPOATA
+============================== */
+
+.cartao-card {
+  background: #fff;
+  border-radius: 40px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.page-header {
+  margin-bottom: 10px;
+}
+
+.page-header h1 {
+  margin-bottom: 10px;
+}
+
+.page-header p {
+  color: #5f6b7a;
+}
+
+.cartao-field label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.cartao-field input[type="file"] {
+  padding: 18px;
+  border: 1px solid #d9dee7;
+  border-radius: 20px;
+  background: #fff;
+}

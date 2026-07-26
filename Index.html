@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ToolBox</title>
+
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Biblioteca local para ler e criar arquivos Excel -->
+    <script src="xlsx.full.min.js" defer></script>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
+    <script src="script.js" defer></script>
+  </head>
+
+  <body>
+    <!-- TOPO FIXO -->
+    <header class="topbar">
+      <div class="page-title" id="pageTitle">Início</div>
+
+      <button 
+      class="icon-btn" 
+      type="button" 
+      aria-label="Perfil do usuário"
+      >
+       👦🏻
+      </button>
+    </header>
+
+    <!-- LATERAL ESQUERDA FIXA -->
+    <aside class="sidebar">
+      <div class="logo-area">
+        <div class="logo-icon">🔧</div>
+        <span>Toolbox</span>
+      </div>
+
+      <!-- #Botão Início -->
+      <button
+      class="menu-btn"
+      type="button"
+      data-file="ferramentas/inicio.html"
+      data-title="INÍCIO"
+      >
+       <span class="avatar">🏠︎</span>
+       <span>Início 🛠</span>
+      </button>
+
+      <!-- REMOVIDO POIS JÁ CRIEI UM OUTRO COM A MESMA FUNÇÃO
+          <button
+            class="menu-btn"
+            type="button"
+            data-file="ferramentas/cartaoResposta.html"
+            data-title="Cartão-resposta"
+          >
+            <span class="avatar">📄</span>
+            <span>Cartão-resposta</span>
+          </button> 
+      -->
+
+      <!-- #Botão Gerador de BD -->
+      <button
+      class="menu-btn"
+      type="button"
+      data-file="ferramentas/geradorBD.html"
+      data-title="GERADOR DE BANCO DE DADOS"
+      >
+        <span class="avatar">🗄️</span>
+        <span>Gerador DE BD</span>
+      </button>
+
+      <!-- #Gerador de cartão -->      
+      <button
+      class="menu-btn"
+      type="button"
+      data-file="ferramentas/geradorCartao.html"
+      data-title="Gerador de Cartão-resposta"
+      >
+        <span class="avatar">📝</span>
+        <span>Gerador de cartão</span>
+      </button>
+
+      <!-- 🛠 #Gerador de Respostas #Em contrução 🛠-->  
+      <button
+      class="menu-btn"
+      type="button"
+      data-file="ferramentas/respostas.html"
+      data-title="Respostas"
+      >
+        <span class="avatar">✓</span>
+        <span>Respostas 🛠</span>
+      </button>
+
+      <!-- # 🛠 Consolidados #Em contrução 🛠-->  
+      <button
+      class="menu-btn"
+      type="button"
+      data-file="ferramentas/consolidados.html"
+      data-title="Consolidados"
+      >
+        <span class="avatar">▦</span>
+        <span>Consolidados 🛠</span>
+      </button>
+
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL: as ferramentas separadas carregam aqui -->
+    <main class="main" id="app">
+      <div class="loading-page">Carregando ferramenta...</div>
+    </main>
+
+  </body>
+</html>

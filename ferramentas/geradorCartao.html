@@ -1,0 +1,65 @@
+<section class="pagina ativa" id="pagina-gerador-cartao">
+  <div class="bd-card">
+    
+    <div class="bd-field">
+      <label>   <!-- <label for="pdfModeloCartao"> alterei, pois quero apenas no input-->  
+        <span class="step-number">1</span>
+        Envie o PDF modelo do cartão
+      </label>
+
+      <input
+        type="file"
+        id="pdfModeloCartao"
+        accept=".pdf"
+      />
+    </div>
+
+    <div class="bd-field">
+      <label for="xlsxCartaoInput">
+        <span class="step-number">2</span>
+        Envie as planilhas de estudantes (.xlsx)
+      </label>
+
+      <input
+        type="file"
+        id="xlsxCartaoInput"
+        multiple
+        accept=".xlsx"
+      />
+    </div>
+
+    <div class="queue-header">
+      <div>
+        <strong>Fila de planilhas</strong>
+        <small id="cartaoFileCounter">0 arquivos</small>
+      </div>
+
+      <button
+        id="btnLimparCartao"
+        class="clear-btn"
+        type="button"
+        hidden
+      >
+        Limpar tudo
+      </button>
+    </div>
+
+    <div class="file-list" id="listaCartaoVisual">
+      <div class="empty-file-list">
+        <span>📂</span>
+        <p>Nenhuma planilha selecionada.</p>
+      </div>
+    </div>
+
+    <button
+      id="btnGerarCartoes"
+      class="generate-btn"
+      type="button"
+      disabled
+    >
+      GERAR E BAIXAR CARTÕES
+    </button>
+
+    <div id="statusCartao" class="status-area" aria-live="polite"></div>
+  </div>
+</section>
