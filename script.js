@@ -155,7 +155,7 @@ function iniciarGeradorBD() {
       return;
     }
 
-    loader.hidden = false;
+    if (loader) loader.hidden = false;
     btnMain.disabled = true;
     limparStatus();
 
@@ -238,7 +238,7 @@ function iniciarGeradorBD() {
     } catch (erro) {
       mostrarStatus(`Erro: ${erro.message}`, "error");
     } finally {
-      loader.hidden = true;
+      if (loader) loader.hidden = true;
       btnMain.disabled = arquivos.length === 0;
     }
   }
