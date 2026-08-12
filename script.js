@@ -42,7 +42,7 @@ async function carregarFerramenta(arquivo, titulo, botaoAtivo = null) {
 
 function iniciarFerramentaAtual(arquivo) {
   if (arquivo.includes("geradorBD.html")) {
-    iniciarGeradorBD();
+   // iniciarGeradorBD();
   }
 }
 
