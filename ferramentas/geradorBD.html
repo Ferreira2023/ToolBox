@@ -1,0 +1,69 @@
+<section class="pagina" id="pagina-gerador-bd">
+  <div class="bd-card">
+    <div class="bd-field">
+
+      <label for="qtdQuestoes">
+         <span class="step-number">1</span>
+          Quantidade de questões
+      </label>
+
+      <select id="qtdQuestoes">
+        <option value="22">22 questões</option>
+        <option value="26">26 questões</option>
+        <option value="44">44 questões</option>
+        <option value="52" selected>52 questões</option>
+      </select>
+
+    </div>
+
+             
+            <div class="bd-field">
+              <label for="fileInput">
+                <span class="step-number">2</span>
+                Selecione as planilhas do AVALBEE (.xlsx)
+              </label>
+
+              <input
+                type="file"
+                id="fileInput"
+                multiple
+                accept=".xlsx"
+              />
+            </div>
+
+            <div class="queue-header">
+              <div>
+                <strong>Fila de processamento</strong>
+                <small id="fileCounter">0 arquivos</small>
+              </div>
+
+              <button
+                id="btnLimpar"
+                class="clear-btn"
+                type="button"
+                hidden
+              >
+                Limpar tudo
+              </button>
+            </div>
+
+            <div class="file-list" id="listaVisual">
+              <div class="empty-file-list">
+                <span>📂</span>
+                <p>Nenhum arquivo selecionado.</p>
+              </div>
+            </div>
+
+            <button id="btnMain" class="generate-btn" type="button" disabled>
+              GERAR E BAIXAR BANCO DE DADOS
+            </button>
+
+            <div id="loader" class="loader" hidden>
+              <!-- <span class="spinner" aria-hidden="true"></span> -->
+              <p>Lendo e consolidando os arquivos...</p>
+            </div>
+
+            <div id="status" class="status-area" aria-live="polite"></div>
+          </div>
+        
+</section>
