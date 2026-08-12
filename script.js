@@ -42,7 +42,7 @@ async function carregarFerramenta(arquivo, titulo, botaoAtivo = null) {
 
 function iniciarFerramentaAtual(arquivo) {
   if (arquivo.includes("geradorBD.html")) {
-   // iniciarGeradorBD();
+    // geradorBD();
   }
 }
 
@@ -61,254 +61,194 @@ carregarFerramenta(primeiroBotao.dataset.file, primeiroBotao.dataset.title, prim
    Lê várias planilhas .xlsx, empilha os dados e acrescenta
    a coluna ARQUIVO_ORIGEM ao final.
 ===================================================== */
-function iniciarGeradorBD() {
-  const qtdQuestoes = document.getElementById("qtdQuestoes");
-  const fileInput = document.getElementById("fileInput");
-  const fileCounter = document.getElementById("fileCounter");
-  const btnLimpar = document.getElementById("btnLimpar");
-  const listaVisual = document.getElementById("listaVisual");
-  const btnMain = document.getElementById("btnMain");
-  const loader = document.getElementById("loader");
-  const status = document.getElementById("status");
+  let arquivosAcumulados = [];
 
-  if (!fileInput || !btnMain || !listaVisual) return;
+    // Mapeamento original D8 do professor
+    const COLUMNS_D8 = [
+      "A","C","D",
+      "S","V","Y","AB","AE","AH","AK","AN","AQ","AT","AW","AZ","BC","BF","BI","BL","BO","BR","BU","BX","CA","CD","CG","CJ","CM","CP","CS","CV","CY","DB","DE","DH","DK","DN","DQ","DT","DW","DZ","EC","EF","EI","EL","EO","ER","EU","EX","FA","FD","FG","FJ","FM","FP"
+    ];
 
-  let arquivos = [];
+    // Mantendo a mesma lógica:
+    // 22 questões => 25 colunas (3 fixas + 22)
+    // 26 questões => 29 colunas (3 fixas + 26)
+    // 44 questões => 47 colunas (3 fixas + 44)
+    // 52 questões => 55 colunas (3 fixas + 52)
+    const CONFIG_QUESTOES = {
+      22: 25,
+      26: 29,
+      44: 47,
+      52: 55
+    };
 
-  fileInput.addEventListener("change", () => {
-    const novosArquivos = Array.from(fileInput.files || []).filter((arquivo) =>
-      arquivo.name.toLowerCase().endsWith(".xlsx")
-    );
-
-    novosArquivos.forEach((arquivo) => {
-      const jaExiste = arquivos.some(
-        (item) => item.name === arquivo.name && item.size === arquivo.size
-      );
-
-      if (!jaExiste) {
-        arquivos.push(arquivo);
+    function colToIdx(letter) {
+      let column = 0;
+      for (let i = 0; i < letter.length; i++) {
+        column += (letter.charCodeAt(i) - 64) * Math.pow(26, letter.length - i - 1);
       }
-    });
+      return column - 1;
+    }
 
-    fileInput.value = "";
-    atualizarFila();
-  });
+    function adicionarArquivos() {
+      const input = document.getElementById('fileInput');
+      for (let f of input.files) {
+        if (!arquivosAcumulados.some(x => x.name === f.name)) {
+          arquivosAcumulados.push(f);
+        }
+      }
+      atualizarInterface();
+      input.value = "";
+    }
 
-  btnLimpar.addEventListener("click", () => {
-    arquivos = [];
-    limparStatus();
-    atualizarFila();
-  });
+    function atualizarInterface() {
+      const lista = document.getElementById('listaVisual');
+      const btnG = document.getElementById('btnMain');
+      const btnL = document.getElementById('btnLimpar');
 
-  btnMain.addEventListener("click", async () => {
-    await gerarBancoDeDados(arquivos, qtdQuestoes.value);
-  });
+      if (arquivosAcumulados.length === 0) {
+        lista.innerHTML = '<div class="text-center text-muted py-3">Vazio</div>';
+        btnG.disabled = true;
+        btnL.style.display = "none";
+        return;
+      }
 
-  function atualizarFila() {
-    const total = arquivos.length;
-
-    fileCounter.textContent = `${total} ${total === 1 ? "arquivo" : "arquivos"}`;
-    btnMain.disabled = total === 0;
-    btnLimpar.hidden = total === 0;
-
-    if (total === 0) {
-      listaVisual.innerHTML = `
-        <div class="empty-file-list">
-          <span>🗁</span>
-          <p>Nenhum arquivo selecionado.</p>
+      btnG.disabled = false;
+      btnL.style.display = "block";
+      lista.innerHTML = arquivosAcumulados.map((f, i) => `
+        <div class="file-item">
+          <span>📄 ${f.name}</span>
+          <span class="remove-btn" onclick="removerArquivo(${i})">✕</span>
         </div>
-      `;
-      return;
+      `).join('');
     }
 
-    listaVisual.innerHTML = arquivos
-      .map(
-        (arquivo, indice) => `
-          <div class="file-item">
-            <div>
-              <strong>${escaparHtml(arquivo.name)}</strong>
-              <small>${formatarTamanho(arquivo.size)}</small>
-            </div>
-            <button class="remove-file-btn" type="button" data-index="${indice}">×</button>
-          </div>
-        `
-      )
-      .join("");
+    function removerArquivo(i) {
+      arquivosAcumulados.splice(i, 1);
+      atualizarInterface();
+    }
 
-    listaVisual.querySelectorAll(".remove-file-btn").forEach((botao) => {
-      botao.addEventListener("click", () => {
-        const indice = Number(botao.dataset.index);
-        arquivos.splice(indice, 1);
-        atualizarFila();
-      });
-    });
+    function limparTudo() {
+      arquivosAcumulados = [];
+      atualizarInterface();
+    }
+
+function normalizarResposta(valor) {
+  if (valor === undefined || valor === null || String(valor).trim() === "") {
+    return "∅";
   }
 
-  async function gerarBancoDeDados(listaArquivos, quantidadeQuestoes) {
-    if (!window.XLSX) {
-      mostrarStatus("A biblioteca xlsx.full.min.js não foi carregada.", "error");
-      return;
-    }
+  const texto = String(valor).toUpperCase().trim();
 
-    if (listaArquivos.length === 0) {
-      mostrarStatus("Selecione pelo menos uma planilha .xlsx.", "error");
-      return;
-    }
+  if (texto === "∅") {
+    return "∅";
+  }
 
-    if (loader) loader.hidden = false;
-    btnMain.disabled = true;
-    limparStatus();
+  if (texto === "#") {
+    return "#";
+  }
 
-    try {
-      let cabecalhoBase = null;
-      const linhasConsolidadas = [];
-      const resumoArquivos = [];
+  // Captura alternativas A, B, C, D ou E encontradas no campo
+  const marcadas = texto.match(/[A-E]/g) || [];
 
-      for (const arquivo of listaArquivos) {
-        const dados = await lerArquivoComoArrayBuffer(arquivo);
-        const workbook = XLSX.read(dados, { type: "array" });
-        const primeiraAba = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[primeiraAba];
+  // Remove repetidas, caso apareça algo como "A A"
+  const unicas = [...new Set(marcadas)];
 
-        const linhas = XLSX.utils.sheet_to_json(worksheet, {
-          header: 1,
-          defval: "",
-          raw: false,
-        });
+  if (unicas.length === 0) {
+    return "∅";
+  }
 
-        const linhasLimpas = removerLinhasVazias(linhas);
+  if (unicas.length === 1) {
+    return unicas[0];
+  }
 
-        if (linhasLimpas.length === 0) {
-          resumoArquivos.push([arquivo.name, 0, "Arquivo ignorado: sem dados"]);
-          continue;
-        }
+  // Se marcou mais de uma alternativa
+  return "#";
+}
 
-        const indiceCabecalho = encontrarCabecalho(linhasLimpas);
-        const cabecalhoAtual = normalizarLinha(linhasLimpas[indiceCabecalho]);
-        const dadosArquivo = linhasLimpas.slice(indiceCabecalho + 1);
+    async function gerarBD() {
+      const loader = document.getElementById('loader');
+      const btnG = document.getElementById('btnMain');
+      const qtd = parseInt(document.getElementById('qtdQuestoes').value, 10);
 
-        if (!cabecalhoBase) {
-          cabecalhoBase = [...cabecalhoAtual, "ARQUIVO_ORIGEM"];
-        }
+      loader.style.display = "block";
+      btnG.disabled = true;
 
-        let linhasValidas = 0;
+      const totalColunas = CONFIG_QUESTOES[qtd];
 
-        dadosArquivo.forEach((linha) => {
-          const linhaNormalizada = normalizarLinha(linha, cabecalhoBase.length - 1);
+      if (!totalColunas) {
+        alert("Quantidade de questões inválida.");
+        loader.style.display = "none";
+        btnG.disabled = false;
+        return;
+      }
 
-          if (linhaNormalizada.some((celula) => String(celula).trim() !== "")) {
-            linhasConsolidadas.push([...linhaNormalizada, arquivo.name]);
-            linhasValidas += 1;
+      const colIndices = COLUMNS_D8.slice(0, totalColunas).map(colToIdx);
+      let dadosFinais = [];
+
+      try {
+        for (let file of arquivosAcumulados) {
+          const data = await file.arrayBuffer();
+          const workbook = XLSX.read(data);
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+          let linesInFile = 0;
+
+          for (let i = 2; i < rows.length; i++) {
+            let row = rows[i];
+
+            if (row && row[2] && String(row[2]).trim() !== "") {
+              let extracted = colIndices.map(idx =>
+                (row[idx] !== undefined && row[idx] !== "") ? row[idx] : "∅"
+              );
+
+              let newRow = new Array(totalColunas + 3).fill("");
+
+              // Mantida a sua lógica:
+              // C -> A
+              // A -> C
+              // D -> F
+              newRow[0] = extracted[1];
+              newRow[2] = extracted[0];
+              newRow[5] = extracted[2];
+
+              for (let j = 3; j < extracted.length; j++) {
+  newRow[j + 3] = normalizarResposta(extracted[j]);
+}
+
+              dadosFinais.push(newRow);
+              linesInFile++;
+            }
           }
-        });
 
-        resumoArquivos.push([arquivo.name, linhasValidas, "Processado"]);
+          if (linesInFile > 0) {
+            let sep = new Array(totalColunas + 3).fill("");
+            sep[0] = `--- FIM DO ARQUIVO: ${file.name} ---`;
+            dadosFinais.push(sep);
+          }
+        }
+
+        google.script.run
+          .withSuccessHandler(url => {
+            loader.style.display = "none";
+            document.getElementById('status').innerHTML =
+              `<div class="alert alert-success mt-3"><b>Sucesso!</b><br><a href="${url}" target="_blank" class="btn btn-success mt-2">ABRIR RESULTADO</a></div>`;
+            arquivosAcumulados = [];
+            atualizarInterface();
+          })
+          .withFailureHandler(err => {
+            alert(err);
+            loader.style.display = "none";
+            btnG.disabled = false;
+          })
+          .criarPlanilhaFinal(dadosFinais);
+
+      } catch (e) {
+        alert("Erro ao ler arquivos: " + e.message);
+        loader.style.display = "none";
+        btnG.disabled = false;
       }
-
-      if (!cabecalhoBase || linhasConsolidadas.length === 0) {
-        throw new Error("Nenhuma linha de dados foi encontrada nas planilhas selecionadas.");
-      }
-
-      const workbookSaida = XLSX.utils.book_new();
-      const dadosSaida = [cabecalhoBase, ...linhasConsolidadas];
-      const wsBD = XLSX.utils.aoa_to_sheet(dadosSaida);
-      XLSX.utils.book_append_sheet(workbookSaida, wsBD, "BD");
-
-      const info = [
-        ["INFORMAÇÃO", "VALOR"],
-        ["Quantidade de questões selecionada", quantidadeQuestoes],
-        ["Arquivos processados", listaArquivos.length],
-        ["Linhas consolidadas", linhasConsolidadas.length],
-        ["Gerado em", new Date().toLocaleString("pt-BR")],
-        [],
-        ["ARQUIVO", "LINHAS", "STATUS"],
-        ...resumoArquivos,
-      ];
-
-      const wsInfo = XLSX.utils.aoa_to_sheet(info);
-      XLSX.utils.book_append_sheet(workbookSaida, wsInfo, "INFO");
-
-      const nomeArquivo = `BD_GERADO_${quantidadeQuestoes}_QUESTOES.xlsx`;
-      XLSX.writeFile(workbookSaida, nomeArquivo);
-
-      mostrarStatus(
-        `Banco de dados gerado com sucesso: ${linhasConsolidadas.length} linhas consolidadas.`,
-        "success"
-      );
-    } catch (erro) {
-      mostrarStatus(`Erro: ${erro.message}`, "error");
-    } finally {
-      if (loader) loader.hidden = true;
-      btnMain.disabled = arquivos.length === 0;
     }
-  }
-
-  atualizarFila();
-
-  function mostrarStatus(mensagem, tipo) {
-    status.textContent = mensagem;
-    status.className = `status-area ${tipo}`;
-  }
-
-  function limparStatus() {
-    status.textContent = "";
-    status.className = "status-area";
-  }
-}
-
-function lerArquivoComoArrayBuffer(arquivo) {
-  return new Promise((resolve, reject) => {
-    const leitor = new FileReader();
-    leitor.onload = (evento) => resolve(evento.target.result);
-    leitor.onerror = () => reject(new Error(`Não foi possível ler ${arquivo.name}`));
-    leitor.readAsArrayBuffer(arquivo);
-  });
-}
-
-function removerLinhasVazias(linhas) {
-  return linhas.filter((linha) =>
-    linha.some((celula) => String(celula ?? "").trim() !== "")
-  );
-}
-
-function encontrarCabecalho(linhas) {
-  const indice = linhas.findIndex(
-    (linha) => linha.filter((celula) => String(celula ?? "").trim() !== "").length >= 2
-  );
-
-  return indice >= 0 ? indice : 0;
-}
-
-function normalizarLinha(linha, tamanho = null) {
-  const novaLinha = Array.from(linha || []).map((celula) =>
-    typeof celula === "string" ? celula.trim() : celula
-  );
-
-  if (tamanho === null) {
-    return novaLinha;
-  }
-
-  while (novaLinha.length < tamanho) {
-    novaLinha.push("");
-  }
-
-  return novaLinha.slice(0, tamanho);
-}
-
-function formatarTamanho(bytes) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function escaparHtml(texto) {
-  return String(texto)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
 
 /* script do Gerador de cartão-resposta*/
 
@@ -362,7 +302,7 @@ function iniciarGeradorCartao() {
     if (filaPlanilhas.length === 0) {
       listaVisual.innerHTML = `
         <div class="empty-file-list">
-          <span>🗁</span>
+          <span>📂</span>
           <p>Nenhuma planilha selecionada.</p>
         </div>
       `;
