@@ -42,8 +42,144 @@ async function carregarFerramenta(arquivo, titulo, botaoAtivo = null) {
 
 function iniciarFerramentaAtual(arquivo) {
   if (arquivo.includes("geradorBD.html")) {
-    // geradorBD();
+    iniciarGeradorBD();
   }
+
+  if (arquivo.includes("uniPlan.html")) {
+    iniciarUnificador();
+  }
+}
+
+
+function iniciarGeradorBD() {
+  const input = document.getElementById("fileInput");
+  const btnMain = document.getElementById("btnMain");
+  const btnLimpar = document.getElementById("btnLimpar");
+
+  if (!input || !btnMain || !btnLimpar) return;
+
+  input.addEventListener("change", adicionarArquivos);
+  btnMain.addEventListener("click", gerarBD);
+  btnLimpar.addEventListener("click", limparTudo);
+
+  atualizarInterface();
+}
+
+function iniciarUnificador() {
+  const input = document.getElementById("fileInput");
+  const btnMain = document.getElementById("btnMain");
+  const btnLimpar = document.getElementById("btnLimpar");
+
+  if (!input || !btnMain || !btnLimpar) return;
+
+  input.addEventListener("change", adicionarArquivosUnificador);
+  btnMain.addEventListener("click", unificarPlanilhas);
+  btnLimpar.addEventListener("click", limparTudoUnificador);
+
+  atualizarInterfaceUnificador();
+}
+
+async function unificarPlanilhas() {
+  if (arquivosUnificador.length === 0) {
+    alert("Selecione pelo menos uma planilha.");
+    return;
+  }
+
+  const dadosUnificados = [];
+  let cabecalhoAdicionado = false;
+
+  for (const arquivo of arquivosUnificador) {
+    const buffer = await arquivo.arrayBuffer();
+    const workbook = XLSX.read(buffer, { type: "array" });
+    const primeiraAba = workbook.Sheets[workbook.SheetNames[0]];
+    const linhas = XLSX.utils.sheet_to_json(primeiraAba, {
+      header: 1,
+      defval: ""
+    });
+
+    if (linhas.length === 0) continue;
+
+    if (!cabecalhoAdicionado) {
+      dadosUnificados.push(...linhas);
+      cabecalhoAdicionado = true;
+    } else {
+      dadosUnificados.push(...linhas.slice(1));
+    }
+  }
+
+  if (dadosUnificados.length === 0) {
+    alert("Nenhum dado encontrado nas planilhas.");
+    return;
+  }
+
+  const novaPlanilha = XLSX.utils.book_new();
+  const novaAba = XLSX.utils.aoa_to_sheet(dadosUnificados);
+  XLSX.utils.book_append_sheet(novaPlanilha, novaAba, "UNIFICADO");
+  XLSX.writeFile(novaPlanilha, "PLANILHAS_UNIFICADAS.xlsx");
+}
+
+function adicionarArquivosUnificador() {
+  const input = document.getElementById("fileInput");
+
+  for (const arquivo of input.files) {
+    if (!arquivosUnificador.some(item => item.name === arquivo.name)) {
+      arquivosUnificador.push(arquivo);
+    }
+  }
+
+  input.value = "";
+  atualizarInterfaceUnificador();
+}
+
+function atualizarInterfaceUnificador() {
+  const lista = document.getElementById("listaVisual");
+  const contador = document.getElementById("fileCounter");
+  const btnMain = document.getElementById("btnMain");
+  const btnLimpar = document.getElementById("btnLimpar");
+
+  if (!lista || !contador || !btnMain || !btnLimpar) return;
+
+  contador.textContent = arquivosUnificador.length === 1
+    ? "1 arquivo"
+    : `${arquivosUnificador.length} arquivos`;
+
+  if (arquivosUnificador.length === 0) {
+    lista.innerHTML = `
+      <div class="empty-file-list">
+        <span>📂</span>
+        <p>Nenhum arquivo selecionado.</p>
+      </div>
+    `;
+    btnMain.disabled = true;
+    btnLimpar.hidden = true;
+    return;
+  }
+
+  lista.innerHTML = arquivosUnificador.map((arquivo, i) => `
+    <div class="file-item">
+      <span>📄 ${arquivo.name}</span>
+      <button type="button" class="remove-file-btn" data-unificador-index="${i}">Remover</button>
+    </div>
+  `).join("");
+
+  lista.querySelectorAll("[data-unificador-index]").forEach(botao => {
+    botao.addEventListener("click", () => {
+      removerArquivoUnificador(Number(botao.dataset.unificadorIndex));
+    });
+  });
+
+  btnMain.disabled = false;
+  btnLimpar.hidden = false;
+}
+
+function removerArquivoUnificador(i) {
+  arquivosUnificador.splice(i, 1);
+  atualizarInterfaceUnificador();
+}
+
+function limparTudoUnificador() {
+  arquivosUnificador = [];
+  atualizarInterfaceUnificador();
 }
 
 menuButtons.forEach((botao) => {
@@ -62,25 +198,31 @@ carregarFerramenta(primeiroBotao.dataset.file, primeiroBotao.dataset.title, prim
    a coluna ARQUIVO_ORIGEM ao final.
 ===================================================== */
   let arquivosAcumulados = [];
+  let arquivosUnificador = [];
 
-    // Mapeamento original D8 do professor
+
+    // 7 dados fixos do aluno + colunas das questoes
     const COLUMNS_D8 = [
-      "A","C","D",
-      "S","V","Y","AB","AE","AH","AK","AN","AQ","AT","AW","AZ","BC","BF","BI","BL","BO","BR","BU","BX","CA","CD","CG","CJ","CM","CP","CS","CV","CY","DB","DE","DH","DK","DN","DQ","DT","DW","DZ","EC","EF","EI","EL","EO","ER","EU","EX","FA","FD","FG","FJ","FM","FP"
+      "A","E","C","D","H","I","F",
+      "U","X","AA","AD","AG","AJ","AM","AP","AS","AV","AY",
+      "BB","BE","BH","BK","BN","BQ","BT","BW","BZ",
+      "CC","CF","CI","CL","CO","CR","CU","CX",
+      "DA","DD","DG","DJ","DM","DP","DS","DV","DY",
+      "EB","EE","EH","EK","EN","EQ","ET","EW","EZ",
+      "FC","FF","FI","FL","FO","FR"
     ];
 
     // Mantendo a mesma lógica:
-    // 22 questões => 25 colunas (3 fixas + 22)
-    // 26 questões => 29 colunas (3 fixas + 26)
-    // 44 questões => 47 colunas (3 fixas + 44)
-    // 52 questões => 55 colunas (3 fixas + 52)
+    // 22 questões => 29 colunas (7 fixas + 22)
+    // 26 questões => 33 colunas (7 fixas + 26)
+    // 44 questões => 51 colunas (7 fixas + 44)
+    // 52 questões => 59 colunas (7 fixas + 52)
     const CONFIG_QUESTOES = {
-      22: 25,
-      26: 29,
-      44: 47,
-      52: 55
-    };
-
+  22: 29,
+  26: 33,
+  44: 51,
+  52: 59
+};
     function colToIdx(letter) {
       let column = 0;
       for (let i = 0; i < letter.length; i++) {
@@ -170,14 +312,14 @@ function normalizarResposta(valor) {
       const btnG = document.getElementById('btnMain');
       const qtd = parseInt(document.getElementById('qtdQuestoes').value, 10);
 
-      loader.style.display = "block";
+      if (loader) loader.style.display = "block";
       btnG.disabled = true;
 
       const totalColunas = CONFIG_QUESTOES[qtd];
 
       if (!totalColunas) {
         alert("Quantidade de questões inválida.");
-        loader.style.display = "none";
+        if (loader) loader.style.display = "none";
         btnG.disabled = false;
         return;
       }
@@ -194,26 +336,23 @@ function normalizarResposta(valor) {
 
           let linesInFile = 0;
 
-          for (let i = 2; i < rows.length; i++) {
+          for (let i = 1; i < rows.length; i++) {
             let row = rows[i];
 
-            if (row && row[2] && String(row[2]).trim() !== "") {
+            if (row && row[5] && String(row[5]).trim() !== "") {
               let extracted = colIndices.map(idx =>
                 (row[idx] !== undefined && row[idx] !== "") ? row[idx] : "∅"
               );
 
-              let newRow = new Array(totalColunas + 3).fill("");
+              let newRow = new Array(totalColunas).fill("");
 
-              // Mantida a sua lógica:
-              // C -> A
-              // A -> C
-              // D -> F
-              newRow[0] = extracted[1];
-              newRow[2] = extracted[0];
-              newRow[5] = extracted[2];
+              // 7 primeiras colunas: dados do aluno na ordem A, E, C, D, H, I, F
+              for (let j = 0; j < 7; j++) {
+                 newRow[j] = extracted[j];
+                 }
 
-              for (let j = 3; j < extracted.length; j++) {
-  newRow[j + 3] = normalizarResposta(extracted[j]);
+              for (let j = 7; j < extracted.length; j++) {
+  newRow[j] = normalizarResposta(extracted[j]);
 }
 
               dadosFinais.push(newRow);
@@ -222,30 +361,41 @@ function normalizarResposta(valor) {
           }
 
           if (linesInFile > 0) {
-            let sep = new Array(totalColunas + 3).fill("");
+            let sep = new Array(totalColunas).fill("");
             sep[0] = `--- FIM DO ARQUIVO: ${file.name} ---`;
             dadosFinais.push(sep);
           }
         }
 
-        google.script.run
-          .withSuccessHandler(url => {
-            loader.style.display = "none";
-            document.getElementById('status').innerHTML =
-              `<div class="alert alert-success mt-3"><b>Sucesso!</b><br><a href="${url}" target="_blank" class="btn btn-success mt-2">ABRIR RESULTADO</a></div>`;
-            arquivosAcumulados = [];
-            atualizarInterface();
-          })
-          .withFailureHandler(err => {
-            alert(err);
-            loader.style.display = "none";
-            btnG.disabled = false;
-          })
-          .criarPlanilhaFinal(dadosFinais);
+if (dadosFinais.length === 0) {
+  alert("Nenhum aluno válido foi encontrado nas planilhas selecionadas.");
+  btnG.disabled = false;
+  return;
+}
+
+        // Geração 100% local do banco de dados (.xlsx)
+        const wbFinal = XLSX.utils.book_new();
+        const wsFinal = XLSX.utils.aoa_to_sheet(dadosFinais);
+        XLSX.utils.book_append_sheet(wbFinal, wsFinal, "RESPOSTAS");
+
+        const agora = new Date();
+        const pad = n => String(n).padStart(2, "0");
+        const nomeArquivo = `BD_ULTRA_RAPIDO_${pad(agora.getDate())}-${pad(agora.getMonth() + 1)}-${agora.getFullYear()}_${pad(agora.getHours())}${pad(agora.getMinutes())}.xlsx`;
+
+        XLSX.writeFile(wbFinal, nomeArquivo);
+
+        if (loader) loader.style.display = "none";
+        const status = document.getElementById("status");
+        if (status) {
+          status.innerHTML = `<div class="alert alert-success mt-3"><b>Sucesso!</b><br>Banco de dados baixado: ${nomeArquivo}</div>`;
+        }
+
+        arquivosAcumulados = [];
+        atualizarInterface();
 
       } catch (e) {
         alert("Erro ao ler arquivos: " + e.message);
-        loader.style.display = "none";
+        if (loader) loader.style.display = "none";
         btnG.disabled = false;
       }
     }
@@ -539,7 +689,6 @@ function iniciarGeradorCartao() {
       console.error(erro);
       status.textContent = `Erro: ${erro.message}`;
     } finally {
-      loader.hidden = true;
       atualizarBotao();
     }
   });
